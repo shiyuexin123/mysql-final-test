@@ -177,11 +177,25 @@ Records: 0  Duplicates: 0  Warnings: 0
 ```
 答：对deptno的某种约束,实体完整性
 3.9 为表2增加一个索引：ename 字段。简述为什么要在 ename 字段建立索引
-
+```
+mysql>create index  ename on biao2 ;
+```
+答：索引就相当于一本书的目录，通过目录可以快速的找到对应的资源，缩小了扫描的范围。
 3.10 将表2的 sal 字段改名为 salary
-
+```
+mysql> ALTER TABLE biao2
+    -> CHANGE sal salary float;
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+```
 3.11 撰写一个函数 get_deptno_from_empno，输入 empno，输出对应的 deptno。 简述函数和存储过程有什么不同。
-
+```
+mysql> CREATE FUNCTION get_deptno_from_empno()
+    -> RETURNS int(8)
+    -> RETURN
+    -> (SELECT deptno FROM biao2
+    -> WHERE empno=biao2.empno);
+```
 4 建立一个新用户，账号为自己的姓名拼音，密码为自己的学号；
 
 4.1 将表1的SELECT, INSERT, UPDATE(ename)权限赋给该账号。
@@ -247,9 +261,9 @@ mysql> select @@tx_isolation;
 8.3 如果隔离级别为 READ-UNCOMMITED, 完成 “MILLER 的 comm 增加 100” 事务操作完成后，可能读到的结果有哪些，原因是什么？
 
 9 有哪些场景不适合用关系型数据库？为什么？
-```
 答：
-1、图片，文件，二进制数据
-2、短生命期数据
-3、日志文件
-```　
+1）需要做复杂处理的数据；
+2）数据量不是特别大的数据；
+3）对安全性要求高的数据；
+4）数据格式单一的数据；
+
