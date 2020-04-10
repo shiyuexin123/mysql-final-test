@@ -197,15 +197,35 @@ mysql> CREATE FUNCTION get_deptno_from_empno()
     -> WHERE empno=biao2.empno);
 ```
 4 建立一个新用户，账号为自己的姓名拼音，密码为自己的学号；
-
+```
+mysql> CREATE USER 'shiyuexin'@'localhost'
+    -> IDENTIFIED BY '17061522';
+Query OK, 0 rows affected (0.01 sec)
+```
 4.1 将表1的SELECT, INSERT, UPDATE(ename)权限赋给该账号。
-
+```
+mysql> GRANT SELECT,INSERT,UPDATE ON biao1.ename
+    -> TO 'shiyuexin'@'localhost'
+    -> IDENTIFIED BY '17061522'
+    -> WITH GRANT OPTION;
+Query OK, 0 rows affected, 0 warning (0.01 sec)
+```
 4.2 显示该账号权限
-
+```
+mysql> SELECT Host,User,Select_priv,Grant_priv
+    -> FROM mysql.user
+    -> WHERE User='shiyuexin';
++-----------+-----------+-------------+------------+
+| Host      |  User     | Select_priv | Grant_priv |
++-----------+-----------+-------------+------------+
+| localhost | shiyuexin | Y           | Y          |
++-----------+-----------+-------------+------------+
+1 row in set (0.01 sec)
+```
 4.3 `with grant option` 是什么意思。
-
+答：`with grant option`可以将select ,update权限授权给第三方。
 5 表 1 和表 2 这样设计是否符合第一范式，是否符合第二范式，为什么？
-
+答：表 1 和表 2符合第一范式，不符合第二范式，因为表1表2的字段都是单一属性的，不可再分。这个单一属性由基本类型构成，包括整型、实数、字符型、逻辑型、日   期型等。 而表1表2中不存在所有非关键字段都完全依赖于任意一组候选关键字。
 6 画出表 1 和表 2 所对应的 E-R 图
 
 7 什么是外模式，什么是内模式。为什么要分成这几层？
@@ -220,7 +240,7 @@ mysql> CREATE FUNCTION get_deptno_from_empno()
 为数据库设计了一个严谨的体系结构，数据库领域公认的标准结构是三级模式结构，它包括外模式、概念模式、内模式，有效地组织、管理数据，提高了数据库的逻辑独立性和物理独立性。用户级对应外模式，概念级对应概念模式，物理级对应内模式，使不同级别的用户对数据库形成不同的视图。
 ```
 8 什么是ACID？
-```
+答：
 ACID 一般是指数据库事务的ACID
 
 一个事务一般是指多个操作的集合，比如插入数据库分两段插入，第二次插入错误，第一次插入操作也需要回退
@@ -244,7 +264,6 @@ ACID的翻译
 耐久性，一个成功的事务将永久性地改变系统的状态，所以在它结束之前，所有导致状态的变化都
 
        记录在一个持久的事务日志中
-```
 
 8.1 编写一个事务，“将 MILLER 的 comm 增加 100，如果增加后的 comm 大于 1000 则回滚”；
 
