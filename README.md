@@ -63,6 +63,19 @@ mysql> insert into biao1
     -> values(10,'ACCOUNTING','NEW YORK'),(20,'RESEARCH','DALLAS'),(30,'SALES','CHICAGO'),(40,'OPERATIONS','BOSTON');
 Query OK, 4 rows affected (0.03 sec)
 Records: 4  Duplicates: 0  Warnings: 0
+
+mysql>select * from biao1;
+
+
++--------+------------+----------+
+| deptno | dname      | loc      |
++--------+------------+----------+
+|     10 | ACCOUNTING | NEW YORK |
+|     20 | RESEARCH   | DALLAS   |
+|     30 | SALES      | CHICAGO  |
+|     40 | OPERATIONS | BOSTON   |
++--------+------------+----------+
+4 rows in set (0.00 sec)
 code here
 ```
 表2：其中empno字段为主键
@@ -112,6 +125,26 @@ mysql> insert into biao2
     ->(7934, 'MILLER', 'CLERK', 7782, '1981-03-12', 1300, NULL, 10);
 Query OK, 13 rows affected (0.02 sec)
 Records: 13  Duplicates: 0  Warnings: 0
+
+mysql> select * from biao2;
++-------+--------+-----------+------+------------+------+------+--------+
+| empno | ename  | job       | MGR  | Hiredate   | sal  | comm | deptno |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7369 | SMITH  | CLERK     | 7902 | 1981-03-12 |  800 | NULL |     20 |
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1982-03-12 | 1600 |  300 |     30 |
+|  7521 | WARD   | SALESMAN  | 7698 | 1838-03-12 | 1250 |  500 |     30 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-03-12 | 2975 | NULL |     20 |
+|  7654 | MARTIN | SALESMAN  | 7698 | 1981-01-12 | 1250 | 1400 |     30 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1985-03-12 | 2450 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
+|  7839 | KING   | PRESIDENT | NULL | 1981-03-12 | 5000 | NULL |     10 |
+|  7844 | TURNER | SALESMAN  | 7689 | 1981-03-12 | 1500 |    0 |     30 |
+|  7878 | ADAMS  | CLERK     | 7788 | 1981-03-12 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK     | 7698 | 1981-03-12 |  950 | NULL |     30 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
+|  7934 | MILLER | CLERK     | 7782 | 1981-03-12 | 1300 | NULL |     10 |
++-------+--------+-----------+------+------------+------+------+--------+
+13 rows in set (0.00 sec)
 ```
 3.1 表2 中再插入一条记录：
 
@@ -135,32 +168,131 @@ mysql> select*from biao2 where Hiredate =(select max(Hiredate) from biao2);
 1 row in set (0.00 sec)
 ```
 3.3 有几种职位（job字段）？在关系代数中，本操作是什么运算？
-    答：有6种职位。本操作是选择运算。
+```sql
+mysql> select distinct job
+    -> from biao2;
++-----------+
+| job       |
++-----------+
+| CLERK     |
+| SALESMAN  |
+| MANAGER   |
+| ANALYST   |
+| PRESIDENT |
+| STUDENT   |
++-----------+
+6 rows in set (0.00 sec)
+```    
+答：有6种职位。本操作是选择运算。
 3.4 将 MILLER 的 comm 增加 100； 然后，找到 comm 比 MILLER 低的人；
+```sql
+mysql> select ename from biao2 WHERE sal > (
+    -> select sal+100 from biao2 WHERE ename='MILLER');
++--------+
+| ename  |
++--------+
+| ALLEN  |
+| JONES  |
+| BLAKE  |
+| SCOTT  |
+| KING   |
+| TURNER |
+| FORD   |
++--------+
+7 rows in set (0.01 sec)
+
+mysql> select * from biao2 WHERE sal > (
+    -> select sal+100 from biao2 WHERE ename='MILLER');
++-------+--------+-----------+------+------------+------+------+--------+
+| empno | ename  | job       | MGR  | Hiredate   | sal  | comm | deptno |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1982-03-12 | 1600 |  300 |     30 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-03-12 | 2975 | NULL |     20 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1985-03-12 | 2450 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
+|  7839 | KING   | PRESIDENT | NULL | 1981-03-12 | 5000 | NULL |     10 |
+|  7844 | TURNER | SALESMAN  | 7689 | 1981-03-12 | 1500 |    0 |     30 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
++-------+--------+-----------+------+------------+------+------+--------+
+7 rows in set (0.00 sec)
 ```
- mysql> UPDATE biao2
-    -> SET comm=1400
-    -> WHERE ename='MILLER';
-    
- mysql> select*from biao2 where comm =(select biao2(Hiredate)<1400 from biao2);
- ```
 3.5 计算每个人的收入(ename, sal + comm)；计算总共有多少人；计算所有人的平均收入。 提示：计算时 NULL 要当做 0 处理； 
+```sql
+mysql> select ename,sal+comm,count(ename) counts,AVG(sal+comm) average_sal_comm from biao2;
++-------+----------+--------+------------------+
+| ename | sal+comm | counts | average_sal_comm |
++-------+----------+--------+------------------+
+| SMITH |     NULL |     14 |             1950 |
++-------+----------+--------+------------------+
+1 row in set (0.01 sec)
 ```
- mysql>select ename,sal+cmm from biao2;
- 
- mysql> select count(biao2.ename) from biao2 group by ename;
- 
- mysql> select sum(biao2.sal+comm)/count(biao2.ename) as biao2.ename FROM table biao2;
- ```
 3.6 显示每个人的下属, 没有下属的显示 NULL。本操作使用关系代数中哪几种运算？
-```
-mysql> select ename,MGR form biao2;
+```sql
+mysql> select biao1.ename My_d_name,biao2.ename My_b_name ,biao3.ename My_name
+    -> from (biao2 biao1 inner join biao2 t2 on biao1. empno= biao2. MGR)  inner join biao2 biao3
+    -> on biao2.empno = biao3.MGR;
++-------------+-----------+---------+
+| My_d_name   | My_b_name | My_name |
++-------------+-----------+---------+
+| JONES       | FORD      | SMITH   |
+| KING        | BLAKE     | ALLEN   |
+| KING        | BLAKE     | WARD    |
+| KING        | BLAKE     | MARTIN  |
+| KING        | JONES     | SCOTT   |
+| JONES       | SCOTT     | ADAMS   |
+| KING        | BLAKE     | JAMES   |
+| KING        | JONES     | FORD    |
++-------------+-----------+---------+
+8 rows in set (0.01 sec)
 ```
 3.7 建立一个视图：每个人的empno, ename, job 和 loc。简述为什么要建立本视图。
-```
-mysql> CREATE VIEW (v_empno,v_ename,v_job,v_loc)
-    -> AS SELECT * FROM (biao2.empno,biao2.ename,biao2.job,biao2.loc);
-Query OK, 0 rows affected (0.00 sec)
+```sql
+mysql> select * from biao1 t1 inner join biao2 t1 on biao1.deptno=biao2.deptno;
++--------+------------+----------+----------+-----------+-----------+------+------------+------+------+--------+
+| deptno | dname      | loc      | empno    | ename     | job       | MGR  | Hiredate   | sal  | comm | deptno |
++--------+------------+----------+----------+-----------+-----------+------+------------+------+------+--------+
+|     20 | RESEARCH   | DALLAS   |     7369 | SMITH     | CLERK     | 7902 | 1981-03-12 |  800 | NULL |     20 |
+|     30 | SALES      | CHICAGO  |     7499 | ALLEN     | SALESMAN  | 7698 | 1982-03-12 | 1600 |  300 |     30 |
+|     30 | SALES      | CHICAGO  |     7521 | WARD      | SALESMAN  | 7698 | 1838-03-12 | 1250 |  500 |     30 |
+|     20 | RESEARCH   | DALLAS   |     7566 | JONES     | MANAGER   | 7839 | 1981-03-12 | 2975 | NULL |     20 |
+|     30 | SALES      | CHICAGO  |     7654 | MARTIN    | SALESMAN  | 7698 | 1981-01-12 | 1250 | 1400 |     30 |
+|     10 | ACCOUNTING | NEW YORK |     7698 | BLAKE     | MANAGER   | 7839 | 1985-03-12 | 2450 | NULL |     10 |
+|     20 | RESEARCH   | DALLAS   |     7788 | SCOTT     | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
+|     10 | ACCOUNTING | NEW YORK |     7839 | KING      | PRESIDENT | NULL | 1981-03-12 | 5000 | NULL |     10 |
+|     30 | SALES      | CHICAGO  |     7844 | TURNER    | SALESMAN  | 7689 | 1981-03-12 | 1500 |    0 |     30 |
+|     20 | RESEARCH   | DALLAS   |     7878 | ADAMS     | CLERK     | 7788 | 1981-03-12 | 1100 | NULL |     20 |
+|     30 | SALES      | CHICAGO  |     7900 | JAMES     | CLERK     | 7698 | 1981-03-12 |  950 | NULL |     30 |
+|     20 | RESEARCH   | DALLAS   |     7902 | FORD      | ANALYST   | 7566 | 1981-03-12 | 3000 | NULL |     20 |
+|     10 | ACCOUNTING | NEW YORK |     7934 | MILLER    | CLERK     | 7782 | 1981-03-12 | 1300 | NULL |     10 |
+|     10 | ACCOUNTING | NEW YORK |    12345 | Zhangsan  | CLERK     | 7782 | 2000-03-12 | NULL | NULL |     10 |
++--------+------------+----------+----------+-----------+-----------+------+------------+------+------+--------+
+14 rows in set (0.01 sec)
+
+mysql> create view view_biao1_biao2
+    -> as
+    -> select empno,ename,job,loc from biao1 t1 inner join biao2 t2 on t1.deptno=t2.deptno;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select * from view_biao1_biao2;
++----------+-----------+-----------+----------+
+| empno    | ename     | job       | loc      |
++----------+-----------+-----------+----------+
+|     7369 | SMITH     | CLERK     | DALLAS   |
+|     7499 | ALLEN     | SALESMAN  | CHICAGO  |
+|     7521 | WARD      | SALESMAN  | CHICAGO  |
+|     7566 | JONES     | MANAGER   | DALLAS   |
+|     7654 | MARTIN    | SALESMAN  | CHICAGO  |
+|     7698 | BLAKE     | MANAGER   | NEW YORK |
+|     7788 | SCOTT     | ANALYST   | DALLAS   |
+|     7839 | KING      | PRESIDENT | NEW YORK |
+|     7844 | TURNER    | SALESMAN  | CHICAGO  |
+|     7878 | ADAMS     | CLERK     | DALLAS   |
+|     7900 | JAMES     | CLERK     | CHICAGO  |
+|     7902 | FORD      | ANALYST   | DALLAS   |
+|     7934 | MILLER    | CLERK     | NEW YORK |
+|    12345 | Zhangsan  | CLERK     | NEW YORK |
++----------+-----------+-----------+----------+
+14 rows in set (0.00 sec)
 ```
 答：1、视图能够简化用户的操作
 2、视图使用户能以多种角度看待同一数据
@@ -281,8 +413,6 @@ mysql> select @@tx_isolation;
 
 9 有哪些场景不适合用关系型数据库？为什么？
 答：
-1）需要做复杂处理的数据；
-2）数据量不是特别大的数据；
-3）对安全性要求高的数据；
-4）数据格式单一的数据；
-
+1、图片，文件，二进制数据：对数据库的读/写的速度永远都赶不上文件系统处理的速度数据库备份变的巨大，越来越耗时间对文件的访问需要穿越你的应用层和数据库层这后两个是真正的杀手。
+2、短生命期数据：使用情况统计数据，测量数据，GPS定位数据，session数据，任何只是短时间内对你有用，或经常变化的数据。如果你发现自己正在使用定时任务从某个表里删除有效期只有一小时，一天或数周的数据，那说明你没有找对正确的做事情的方法。使用redis， statsd/graphite， Riak，它们都是干这种事情更合适的工具。这建议也适用于对于收集那些短生命期的数据。
+3、日志文件：也许你的日志记录做的很保守，每次web请求只产生一条日志。对于整个网站的每个事件来说，这仍然会产生大量的数据库插入操作，争夺你用户需要的数据库资源。如果你的日志级别设置为verbose或debug，那等着看你的数据库着火吧。
